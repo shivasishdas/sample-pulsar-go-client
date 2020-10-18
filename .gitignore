@@ -16,3 +16,7 @@
 
 .env
 .pconfig
+
+.idea/
+
+*/ca-certificates.crt

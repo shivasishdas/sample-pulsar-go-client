@@ -1,22 +1,28 @@
 package main
-
 import (
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/shivasishdas/sample-pulsar-go-client/src"
 	"log"
+	"os"
 
 	"github.com/apache/pulsar/pulsar-client-go/pulsar"
 )
 
-// Note: relace JWT token, host, tenant, namespace, and topic
 func main() {
+
+	// loads values from .env into the system
+	if err := godotenv.Load(src.EnvFilePath); err != nil {
+		panic("No .env file found")
+	}
+
 	fmt.Println("Pulsar Reader")
 
 	// Configuration variables pertaining to this reader
-	tokenStr := "{JWT token}"
-	uri := "pulsar+ssl://{host}:6651"
-	trustStore := "/etc/ssl/certs/ca-bundle.crt"
-	topicName := "persistent://{tenant}/{namespace}/{topic}"
+	tokenStr, _ := os.LookupEnv("KESQUE_TOKEN")
+	uri,_ := os.LookupEnv("KESQUE_URI")
+	topicName,_ := os.LookupEnv("KESQUE_TOPIC")
 
 	token := pulsar.NewAuthenticationToken(tokenStr)
 
@@ -24,7 +30,8 @@ func main() {
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:                   uri,
 		Authentication:        token,
-		TLSTrustCertsFilePath: trustStore,
+
+		//TLSTrustCertsFilePath: trustStore,
 	})
 
 	if err != nil {
@@ -52,7 +59,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Printf("Received message : %v\n", string(msg.Payload()))
+			fmt.Println("Received message : ", string(msg.Payload()))
 		}
 	}
 

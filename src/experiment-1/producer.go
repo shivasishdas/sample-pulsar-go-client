@@ -1,29 +1,35 @@
 package main
-
 import (
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/shivasishdas/sample-pulsar-go-client/src"
 	"log"
+	"os"
 
 	"github.com/apache/pulsar/pulsar-client-go/pulsar"
 )
 
-// Note: relace JWT token, tenant, namespace, and topic
 func main() {
+
+	// loads values from .env into the system
+	if err := godotenv.Load(src.EnvFilePath); err != nil {
+		panic("No .env file found")
+	}
+
 	fmt.Println("Pulsar Producer")
 
-	// Configuration variables pertaining to this producer
-	tokenStr := "{JWT token}"
-	uri := "pulsar+ssl://{host}:6651"
-	trustStore := "/etc/ssl/certs/ca-bundle.crt"
-	topicName := "persistent://{tenant}/{namespace}/{topic}"
+	// Configuration variables pertaining to this consumer
+	tokenStr, _ := os.LookupEnv("KESQUE_TOKEN")
+	uri,_ := os.LookupEnv("KESQUE_URI")
+	topicName,_ := os.LookupEnv("KESQUE_TOPIC")
 
 	token := pulsar.NewAuthenticationToken(tokenStr)
 
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:                     uri,
 		Authentication:          token,
-		TLSTrustCertsFilePath:   trustStore,
+		//TLSTrustCertsFilePath:   trustStore,
 		IOThreads:               3,
 		OperationTimeoutSeconds: 5,
 	})
@@ -76,7 +82,7 @@ func main() {
 				log.Fatal(err)
 			}
 
-			fmt.Printf("the %s successfully published\n", string(msg.Payload))
+			fmt.Println("successfully published ", string(msg.Payload))
 		})
 	}
 }
